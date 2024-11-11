@@ -131,6 +131,10 @@
             const target = document.elementFromPoint(touch.clientX, touch.clientY);
             if (target && target.classList.contains('tile') && target.classList.contains('black') && target.childElementCount === 0) {
                 movePieceToTarget(draggedPiece, target);
+            } else {
+                // If the move is illegal, reset the piece position
+                draggedPiece.style.left = '';
+                draggedPiece.style.top = '';
             }
             draggedPiece.style.position = 'static';
             draggedPiece.style.zIndex = '';
@@ -149,8 +153,10 @@
 
             if (target && target.classList.contains('tile') && target.childElementCount === 0 && target.classList.contains('black')) {
                 if (isForwardMove && Math.abs(colDifference) === 1) {
+                    // Regular move
                     target.appendChild(piece);
                 } else if (isJumpMove) {
+                    // Jump move
                     const jumpedTile = getJumpedTile(startRow, startCol, targetRow, targetCol);
                     if (jumpedTile && jumpedTile.childElementCount > 0) {
                         const jumpedPiece = jumpedTile.querySelector('.piece');
