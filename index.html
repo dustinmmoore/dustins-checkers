@@ -86,8 +86,8 @@
             piece.draggable = true;
             piece.addEventListener('dragstart', dragStart);
             piece.addEventListener('dragend', dragEnd);
-            piece.addEventListener('touchstart', touchStart);
-            piece.addEventListener('touchmove', touchMove);
+            piece.addEventListener('touchstart', touchStart, { passive: false });
+            piece.addEventListener('touchmove', touchMove, { passive: false });
             piece.addEventListener('touchend', touchEnd);
             tile.appendChild(piece);
         }
@@ -111,7 +111,10 @@
                 return;
             }
             draggedPiece = e.target;
-            e.target.style.position = 'absolute';
+            draggedPieceInitialX = e.touches[0].pageX;
+            draggedPieceInitialY = e.touches[0].pageY;
+            draggedPiece.style.position = 'absolute';
+            draggedPiece.style.zIndex = 1000;
         }
 
         function touchMove(e) {
@@ -130,6 +133,7 @@
                 movePieceToTarget(draggedPiece, target);
             }
             draggedPiece.style.position = 'static';
+            draggedPiece.style.zIndex = '';
             draggedPiece = null;
         }
 
