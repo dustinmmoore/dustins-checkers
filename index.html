@@ -61,6 +61,7 @@
         };
         let currentPlayer = 'red';
         let scores = { red: 0, black: 0 };
+        let draggedPiece = null;
 
         function createTile(row, col) {
             const tile = document.createElement('div');
@@ -85,6 +86,9 @@
             piece.draggable = true;
             piece.addEventListener('dragstart', dragStart);
             piece.addEventListener('dragend', dragEnd);
+            piece.addEventListener('touchstart', touchStart);
+            piece.addEventListener('touchmove', touchMove);
+            piece.addEventListener('touchend', touchEnd);
             tile.appendChild(piece);
         }
 
@@ -101,11 +105,38 @@
             e.target.style.display = 'block';
         }
 
+        function touchStart(e) {
+            if (!e.target.classList.contains(currentPlayer)) {
+                e.preventDefault();
+                return;
+            }
+            draggedPiece = e.target;
+            e.target.style.position = 'absolute';
+        }
+
+        function touchMove(e) {
+            if (!draggedPiece) return;
+            const touch = e.touches[0];
+            draggedPiece.style.left = `${touch.pageX - board.offsetLeft - draggedPiece.clientWidth / 2}px`;
+            draggedPiece.style.top = `${touch.pageY - board.offsetTop - draggedPiece.clientHeight / 2}px`;
+            e.preventDefault();
+        }
+
+        function touchEnd(e) {
+            if (!draggedPiece) return;
+            const touch = e.changedTouches[0];
+            const target = document.elementFromPoint(touch.clientX, touch.clientY);
+            if (target && target.classList.contains('tile') && target.classList.contains('black') && target.childElementCount === 0) {
+                movePieceToTarget(draggedPiece, target);
+            }
+            draggedPiece.style.position = 'static';
+            draggedPiece = null;
+        }
+
         function movePieceToTarget(piece, target) {
             const [startRow, startCol] = [piece.parentElement.dataset.row, piece.parentElement.dataset.col].map(Number);
             const [targetRow, targetCol] = [target.dataset.row, target.dataset.col].map(Number);
 
-            // Only allow diagonal moves
             const rowDifference = targetRow - startRow;
             const colDifference = targetCol - startCol;
 
@@ -114,10 +145,8 @@
 
             if (target && target.classList.contains('tile') && target.childElementCount === 0 && target.classList.contains('black')) {
                 if (isForwardMove && Math.abs(colDifference) === 1) {
-                    // Regular move
                     target.appendChild(piece);
                 } else if (isJumpMove) {
-                    // Jump move
                     const jumpedTile = getJumpedTile(startRow, startCol, targetRow, targetCol);
                     if (jumpedTile && jumpedTile.childElementCount > 0) {
                         const jumpedPiece = jumpedTile.querySelector('.piece');
@@ -127,13 +156,13 @@
                             updateScore();
                             target.appendChild(piece);
                         } else {
-                            return; // Prevent jumping over the same color piece
+                            return;
                         }
                     } else {
-                        return; // Prevent invalid jump
+                        return;
                     }
                 } else {
-                    return; // Prevent invalid move
+                    return;
                 }
 
                 currentPlayer = currentPlayer === 'red' ? 'black' : 'red';
