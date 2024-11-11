@@ -1,0 +1,119 @@
+ body {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    margin: 0;
+    background: linear-gradient(135deg, #1e1e2f, #3b3b58);
+    color: #e0e0e0;
+    font-family: 'MedievalSharp', cursive;
+}
+.container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+}
+.title {
+    font-size: 2em;
+    margin-bottom: 20px;
+}
+.board {
+    display: grid;
+    grid-template-columns: repeat(8, 1fr);
+    grid-template-rows: repeat(8, 1fr);
+    width: 90vw;
+    max-width: 480px;
+    height: 90vw;
+    max-height: 480px;
+    border: 5px solid #2e2e3e;
+    margin-bottom: 20px;
+    box-shadow: 0 0 20px #000;
+}
+.tile {
+    width: 100%;
+    height: 100%;
+}
+.tile.black {
+    background: linear-gradient(145deg, #2d2d3b, #1b1b26);
+}
+.tile.white {
+    background: linear-gradient(145deg, #44475a, #2c2c3e);
+}
+.piece {
+    width: 80%;
+    height: 80%;
+    border-radius: 50%;
+    box-shadow: 0 0 15px #000;
+}
+.piece.red {
+    background: linear-gradient(145deg, #ff5555, #a82424);
+}
+.piece.black {
+    background: linear-gradient(145deg, #6272a4, #3b4872);
+}
+.score-table {
+    border-collapse: collapse;
+    margin-bottom: 20px;
+    width: 100%;
+    max-width: 300px;
+    background: #1e1e2f;
+    box-shadow: 0 0 15px #000;
+}
+.score-table th, .score-table td {
+    border: 1px solid #555;
+    padding: 10px;
+    text-align: center;
+}
+.score-table th {
+    background-color: #3b3b58;
+}
+.score-table td {
+    background-color: #2e2e3e;
+}
+.contact-info {
+    margin-top: 20px;
+    padding: 20px;
+    background: #2e2e3e;
+    border-radius: 10px;
+    box-shadow: 0 0 20px #000;
+    text-align: center;
+    width: 100%;
+    max-width: 400px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+.contact-info .contact-item {
+    display: flex;
+    align-items: center;
+    margin: 10px 0;
+    background: linear-gradient(135deg, #3b3b58, #2e2e3e);
+    padding: 10px;
+    border-radius: 5px;
+    width: 90%;
+}
+.contact-info .contact-item i {
+    margin-right: 10px;
+    font-size: 1.5em;
+    color: #50fa7b;
+}
+.contact-info a {
+    color: #50fa7b;
+    text-decoration: none;
+    font-weight: bold;
+}
+.contact-info a:hover {
+    text-decoration: underline;
+}
+.contact-info .author {
+    color: #00FFFF;
+    font-weight: bold;
+}
+.current-turn {
+    font-size: 1.2em;
+    margin-bottom: 20px;
+    font-weight: bold;
+    color: #ffffff;
+}

@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dustin's Checkers</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=MedievalSharp&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+<body>
+    <div class="container">
+        <div class="title">Dustin's Checkers</div>
+        <div class="board" id="board"></div>
+        <table class="score-table">
+            <tr>
+                <th>Player 1 (Red)</th>
+                <th>Player 2 (Black)</th>
+            </tr>
+            <tr>
+                <td id="score-red">0</td>
+                <td id="score-black">0</td>
+            </tr>
+        </table>
+        <div id="current-turn" class="current-turn">Current Turn: Player 1 (Red)</div>
+    </div>
+
+    <div class="contact-info">
+        <div class="contact-item">
+            <i class="fas fa-user"></i>
+            <span class="author">Author: Dustin Moore</span>
+        </div>
+        <div class="contact-item">
+            <i class="fas fa-globe"></i>
+            <a href="https://www.dustinmoore.dev">www.dustinmoore.dev</a>
+        </div>
+        <div class="contact-item">
+            <i class="fas fa-envelope"></i>
+            <a href="mailto:dustinmoore@icloud.com">dustinmoore@icloud.com</a>
+        </div>
+        <div class="contact-item">
+            <i class="fab fa-linkedin"></i>
+            <a href="https://www.linkedin.com/in/dustinmmoore">linkedin.com/in/dustinmmoore</a>
+        </div>
+        <div class="contact-item">
+            <i class="fab fa-github"></i>
+            <a href="https://github.com/dustinmmoore">github.com/dustinmmoore</a>
+        </div>
+    </div>
+
+    <script>
+        const board = document.getElementById('board');
+        const scoreRed = document.getElementById('score-red');
+        const scoreBlack = document.getElementById('score-black');
+        const currentTurnDisplay = document.getElementById('current-turn');
+
+        const TILE_COLORS = ["white", "black"];
+        const PIECE_ROWS = {
+            black: [0, 1, 2],
+            red: [5, 6, 7]
+        };
+        let currentPlayer = 'red';
+        let scores = { red: 0, black: 0 };
+
+        function createTile(row, col) {
+            const tile = document.createElement('div');
+            tile.classList.add('tile', TILE_COLORS[(row + col) % 2]);
+            tile.dataset.row = row;
+            tile.dataset.col = col;
+
+            if (tile.classList.contains('black')) {
+                if (PIECE_ROWS.black.includes(row)) {
+                    addPiece(tile, 'black');
+                } else if (PIECE_ROWS.red.includes(row)) {
+                    addPiece(tile, 'red');
+                }
+            }
+
+            board.appendChild(tile);
+        }
+
+        function addPiece(tile, color) {
+            const piece = document.createElement('div');
+            piece.classList.add('piece', color);
+            piece.draggable = true;
+            piece.addEventListener('dragstart', dragStart);
+            piece.addEventListener('dragend', dragEnd);
+            tile.appendChild(piece);
+        }
+
+        function dragStart(e) {
+            if (!e.target.classList.contains(currentPlayer)) {
+                e.preventDefault();
+                return;
+            }
+            e.dataTransfer.setData('text/plain', `${e.target.parentElement.dataset.row},${e.target.parentElement.dataset.col}`);
+            setTimeout(() => e.target.style.display = 'none', 0);
+        }
+
+        function dragEnd(e) {
+            e.target.style.display = 'block';
+        }
+
+        function movePieceToTarget(piece, target) {
+            const [startRow, startCol] = [piece.parentElement.dataset.row, piece.parentElement.dataset.col].map(Number);
+            const [targetRow, targetCol] = [target.dataset.row, target.dataset.col].map(Number);
+
+            // Only allow diagonal moves
+            const rowDifference = targetRow - startRow;
+            const colDifference = targetCol - startCol;
+
+            const isForwardMove = (currentPlayer === 'red' && rowDifference === -1) || (currentPlayer === 'black' && rowDifference === 1);
+            const isJumpMove = Math.abs(rowDifference) === 2 && Math.abs(colDifference) === 2;
+
+            if (target && target.classList.contains('tile') && target.childElementCount === 0 && target.classList.contains('black')) {
+                if (isForwardMove && Math.abs(colDifference) === 1) {
+                    // Regular move
+                    target.appendChild(piece);
+                } else if (isJumpMove) {
+                    // Jump move
+                    const jumpedTile = getJumpedTile(startRow, startCol, targetRow, targetCol);
+                    if (jumpedTile && jumpedTile.childElementCount > 0) {
+                        const jumpedPiece = jumpedTile.querySelector('.piece');
+                        if (jumpedPiece.classList.contains(currentPlayer === 'red' ? 'black' : 'red')) {
+                            jumpedTile.removeChild(jumpedPiece);
+                            scores[currentPlayer] += 1;
+                            updateScore();
+                            target.appendChild(piece);
+                        } else {
+                            return; // Prevent jumping over the same color piece
+                        }
+                    } else {
+                        return; // Prevent invalid jump
+                    }
+                } else {
+                    return; // Prevent invalid move
+                }
+
+                currentPlayer = currentPlayer === 'red' ? 'black' : 'red';
+                currentTurnDisplay.textContent = `Current Turn: ${currentPlayer === 'red' ? 'Player 1 (Red)' : 'Player 2 (Black)'}`;
+                piece.style.position = 'static';
+            } else {
+                piece.style.position = 'static';
+            }
+        }
+
+        function getJumpedTile(startRow, startCol, targetRow, targetCol) {
+            const jumpedRow = (startRow + targetRow) / 2;
+            const jumpedCol = (startCol + targetCol) / 2;
+            return document.querySelector(`[data-row='${jumpedRow}'][data-col='${jumpedCol}']`);
+        }
+
+        function initializeBoard() {
+            for (let row = 0; row < 8; row++) {
+                for (let col = 0; col < 8; col++) {
+                    createTile(row, col);
+                }
+            }
+        }
+
+        function updateScore() {
+            scoreRed.textContent = scores.red;
+            scoreBlack.textContent = scores.black;
+        }
+
+        board.addEventListener('dragover', (e) => e.preventDefault());
+
+        board.addEventListener('drop', (e) => {
+            const target = e.target;
+            const [startRow, startCol] = e.dataTransfer.getData('text').split(',').map(Number);
+            const piece = document.querySelector(`[data-row='${startRow}'][data-col='${startCol}'] .piece`);
+            movePieceToTarget(piece, target);
+        });
+
+        initializeBoard();
+    </script>
+</body>
+</html>
