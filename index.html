@@ -142,7 +142,7 @@
             const touch = e.changedTouches[0];
             const target = document.elementFromPoint(touch.clientX, touch.clientY);
             if (target && target.classList.contains('tile') && target.classList.contains('black') && target.childElementCount === 0) {
-                movePieceToTarget(draggedPiece, target);
+                snapPieceToTarget(draggedPiece, target);
             } else {
                 // Reset position if move is illegal
                 draggedPiece.style.transform = 'translate(0, 0)';
@@ -153,7 +153,7 @@
             draggedPieceStartTile = null;
         }
 
-        function movePieceToTarget(piece, target) {
+        function snapPieceToTarget(piece, target) {
             const [startRow, startCol] = [piece.parentElement.dataset.row, piece.parentElement.dataset.col].map(Number);
             const [targetRow, targetCol] = [target.dataset.row, target.dataset.col].map(Number);
 
@@ -220,7 +220,7 @@
             const target = e.target;
             const [startRow, startCol] = e.dataTransfer.getData('text').split(',').map(Number);
             const piece = document.querySelector(`[data-row='${startRow}'][data-col='${startCol}'] .piece`);
-            movePieceToTarget(piece, target);
+            snapPieceToTarget(piece, target);
         });
 
         initializeBoard();
