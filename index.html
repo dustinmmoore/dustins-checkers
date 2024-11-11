@@ -71,6 +71,7 @@
         let currentPlayer = 'red';
         let scores = { red: 0, black: 0 };
         let draggedPiece = null;
+        let draggedPieceStartTile = null;
 
         function createTile(row, col) {
             const tile = document.createElement('div');
@@ -120,6 +121,7 @@
                 return;
             }
             draggedPiece = e.target;
+            draggedPieceStartTile = e.target.parentElement;
             draggedPieceInitialX = e.touches[0].pageX;
             draggedPieceInitialY = e.touches[0].pageY;
             draggedPiece.style.transform = 'translate(0, 0)';
@@ -144,9 +146,11 @@
             } else {
                 // Reset position if move is illegal
                 draggedPiece.style.transform = 'translate(0, 0)';
+                draggedPieceStartTile.appendChild(draggedPiece);
             }
             draggedPiece.style.zIndex = '';
             draggedPiece = null;
+            draggedPieceStartTile = null;
         }
 
         function movePieceToTarget(piece, target) {
