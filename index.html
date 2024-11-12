@@ -202,8 +202,14 @@
                 currentPlayer = currentPlayer === 'red' ? 'black' : 'red';
                 currentTurnDisplay.textContent = `Current Turn: ${currentPlayer === 'red' ? 'Player 1 (Red)' : 'Player 2 (Black)'}`;
                 piece.style.transform = 'translate(0, 0)';
+                piece.style.position = 'relative';
+                piece.style.left = '0';
+                piece.style.top = '0';
             } else {
                 piece.style.transform = 'translate(0, 0)';
+                piece.style.position = 'relative';
+                piece.style.left = '0';
+                piece.style.top = '0';
             }
         }
 
