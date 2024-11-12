@@ -223,6 +223,44 @@
             snapPieceToTarget(piece, target);
         });
 
+        // Touch event handlers
+        let touchStartX, touchStartY, touchPiece;
+
+        board.addEventListener('touchstart', (e) => {
+            const touch = e.touches[0];
+            touchStartX = touch.clientX;
+            touchStartY = touch.clientY;
+            touchPiece = document.elementFromPoint(touchStartX, touchStartY);
+            if (touchPiece && touchPiece.classList.contains('piece')) {
+                e.preventDefault();
+            }
+        });
+
+        board.addEventListener('touchmove', (e) => {
+            const touch = e.touches[0];
+            const touchMoveX = touch.clientX;
+            const touchMoveY = touch.clientY;
+            if (touchPiece) {
+                touchPiece.style.position = 'absolute';
+                touchPiece.style.left = `${touchMoveX}px`;
+                touchPiece.style.top = `${touchMoveY}px`;
+                e.preventDefault();
+            }
+        });
+
+        board.addEventListener('touchend', (e) => {
+            if (touchPiece) {
+                const touch = e.changedTouches[0];
+                const target = document.elementFromPoint(touch.clientX, touch.clientY);
+                snapPieceToTarget(touchPiece, target);
+                touchPiece.style.position = '';
+                touchPiece.style.left = '';
+                touchPiece.style.top = '';
+                touchPiece = null;
+                e.preventDefault();
+            }
+        });
+
         initializeBoard();
     </script>
 </body>
