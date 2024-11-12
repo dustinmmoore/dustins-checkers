@@ -65,7 +65,7 @@
         </div>
         <div class="contact-item">
             <i class="fab fa-github"></i>
-            <a href="https://github.com/dustinmmoore" target="_blank">github.com/dustinmoore</a>
+            <a href="https://github.com/dustinmmoore" target="_blank">github.com/dustinmmoore</a>
         </div>
     </div>
 
@@ -136,7 +136,6 @@
             draggedPieceStartTile = e.target.parentElement;
             draggedPieceInitialX = e.touches[0].pageX;
             draggedPieceInitialY = e.touches[0].pageY;
-            draggedPiece.style.transform = 'translate(0, 0)';
             draggedPiece.style.zIndex = 1000;
         }
 
@@ -154,18 +153,19 @@
             const touch = e.changedTouches[0];
             const target = document.elementFromPoint(touch.clientX, touch.clientY);
             if (target && target.classList.contains('tile') && target.classList.contains('black') && target.childElementCount === 0) {
-                snapPieceToTarget(draggedPiece, target);
+                movePieceToTarget(draggedPiece, target);
             } else {
                 // Reset position if move is illegal
                 draggedPiece.style.transform = 'translate(0, 0)';
                 draggedPieceStartTile.appendChild(draggedPiece);
             }
             draggedPiece.style.zIndex = '';
+            draggedPiece.style.transform = 'translate(0, 0)';
             draggedPiece = null;
             draggedPieceStartTile = null;
         }
 
-        function snapPieceToTarget(piece, target) {
+        function movePieceToTarget(piece, target) {
             const [startRow, startCol] = [piece.parentElement.dataset.row, piece.parentElement.dataset.col].map(Number);
             const [targetRow, targetCol] = [target.dataset.row, target.dataset.col].map(Number);
 
@@ -233,7 +233,7 @@
             const target = e.target;
             const [startRow, startCol] = e.dataTransfer.getData('text').split(',').map(Number);
             const piece = document.querySelector(`[data-row='${startRow}'][data-col='${startCol}'] .piece`);
-            snapPieceToTarget(piece, target);
+            movePieceToTarget(piece, target);
         });
 
         initializeBoard();
