@@ -15,6 +15,18 @@
             position: relative;
             touch-action: none;
         }
+        .board {
+            display: grid;
+            grid-template-columns: repeat(8, 1fr);
+            grid-template-rows: repeat(8, 1fr);
+            width: 400px;
+            height: 400px;
+            margin: 20px auto;
+        }
+        .tile {
+            width: 100%;
+            height: 100%;
+        }
     </style>
 </head>
 <body>
@@ -53,7 +65,7 @@
         </div>
         <div class="contact-item">
             <i class="fab fa-github"></i>
-            <a href="https://github.com/dustinmmoore" target="_blank">github.com/dustinmmoore</a>
+            <a href="https://github.com/dustinmmoore" target="_blank">github.com/dustinmoore</a>
         </div>
     </div>
 
@@ -202,6 +214,7 @@
         }
 
         function initializeBoard() {
+            board.innerHTML = '';
             for (let row = 0; row < 8; row++) {
                 for (let col = 0; col < 8; col++) {
                     createTile(row, col);
@@ -221,44 +234,6 @@
             const [startRow, startCol] = e.dataTransfer.getData('text').split(',').map(Number);
             const piece = document.querySelector(`[data-row='${startRow}'][data-col='${startCol}'] .piece`);
             snapPieceToTarget(piece, target);
-        });
-
-        // Touch event handlers
-        let touchStartX, touchStartY, touchPiece;
-
-        board.addEventListener('touchstart', (e) => {
-            const touch = e.touches[0];
-            touchStartX = touch.clientX;
-            touchStartY = touch.clientY;
-            touchPiece = document.elementFromPoint(touchStartX, touchStartY);
-            if (touchPiece && touchPiece.classList.contains('piece')) {
-                e.preventDefault();
-            }
-        });
-
-        board.addEventListener('touchmove', (e) => {
-            const touch = e.touches[0];
-            const touchMoveX = touch.clientX;
-            const touchMoveY = touch.clientY;
-            if (touchPiece) {
-                touchPiece.style.position = 'absolute';
-                touchPiece.style.left = `${touchMoveX}px`;
-                touchPiece.style.top = `${touchMoveY}px`;
-                e.preventDefault();
-            }
-        });
-
-        board.addEventListener('touchend', (e) => {
-            if (touchPiece) {
-                const touch = e.changedTouches[0];
-                const target = document.elementFromPoint(touch.clientX, touch.clientY);
-                snapPieceToTarget(touchPiece, target);
-                touchPiece.style.position = '';
-                touchPiece.style.left = '';
-                touchPiece.style.top = '';
-                touchPiece = null;
-                e.preventDefault();
-            }
         });
 
         initializeBoard();
