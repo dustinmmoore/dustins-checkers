@@ -9,10 +9,13 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
         .piece {
-            width: 100%;
-            height: 100%;
+            width: 90%;
+            height: 90%;
             box-sizing: border-box;
-            position: relative;
+            position: absolute;
+            top: 5%;
+            left: 5%;
+            border-radius: 50%;
             touch-action: none;
         }
         .board {
@@ -22,10 +25,18 @@
             width: 400px;
             height: 400px;
             margin: 20px auto;
+            border: 2px solid #000;
         }
         .tile {
             width: 100%;
             height: 100%;
+            position: relative;
+        }
+        .tile.black {
+            background-color: #444;
+        }
+        .tile.white {
+            background-color: #eee;
         }
     </style>
 </head>
@@ -65,7 +76,7 @@
         </div>
         <div class="contact-item">
             <i class="fab fa-github"></i>
-            <a href="https://github.com/dustinmmoore" target="_blank">github.com/dustinmmoore</a>
+            <a href="https://github.com/dustinmmoore" target="_blank">github.com/dustinmoore</a>
         </div>
     </div>
 
@@ -84,6 +95,8 @@
         let scores = { red: 0, black: 0 };
         let draggedPiece = null;
         let draggedPieceStartTile = null;
+        let draggedPieceOffsetX = 0;
+        let draggedPieceOffsetY = 0;
 
         function createTile(row, col) {
             const tile = document.createElement('div');
@@ -105,6 +118,7 @@
         function addPiece(tile, color) {
             const piece = document.createElement('div');
             piece.classList.add('piece', color);
+            piece.style.backgroundColor = color;
             piece.draggable = true;
             piece.addEventListener('dragstart', dragStart);
             piece.addEventListener('dragend', dragEnd);
@@ -134,17 +148,19 @@
             }
             draggedPiece = e.target;
             draggedPieceStartTile = e.target.parentElement;
-            draggedPieceInitialX = e.touches[0].pageX;
-            draggedPieceInitialY = e.touches[0].pageY;
+            draggedPieceOffsetX = e.touches[0].clientX - draggedPiece.getBoundingClientRect().left;
+            draggedPieceOffsetY = e.touches[0].clientY - draggedPiece.getBoundingClientRect().top;
+            draggedPiece.style.position = 'absolute';
             draggedPiece.style.zIndex = 1000;
         }
 
         function touchMove(e) {
             if (!draggedPiece) return;
             const touch = e.touches[0];
-            const deltaX = touch.pageX - draggedPieceInitialX;
-            const deltaY = touch.pageY - draggedPieceInitialY;
-            draggedPiece.style.transform = `translate(${deltaX}px, ${deltaY}px)`;
+            const newX = touch.clientX - draggedPieceOffsetX;
+            const newY = touch.clientY - draggedPieceOffsetY;
+            draggedPiece.style.left = `${newX}px`;
+            draggedPiece.style.top = `${newY}px`;
             e.preventDefault();
         }
 
@@ -155,12 +171,12 @@
             if (target && target.classList.contains('tile') && target.classList.contains('black') && target.childElementCount === 0) {
                 movePieceToTarget(draggedPiece, target);
             } else {
-                // Reset position if move is illegal
-                draggedPiece.style.transform = 'translate(0, 0)';
-                draggedPieceStartTile.appendChild(draggedPiece);
+                resetPiecePosition(draggedPiece);
             }
             draggedPiece.style.zIndex = '';
-            draggedPiece.style.transform = 'translate(0, 0)';
+            draggedPiece.style.position = 'relative';
+            draggedPiece.style.left = '0';
+            draggedPiece.style.top = '0';
             draggedPiece = null;
             draggedPieceStartTile = null;
         }
@@ -175,41 +191,43 @@
             const isForwardMove = (currentPlayer === 'red' && rowDifference === -1) || (currentPlayer === 'black' && rowDifference === 1);
             const isJumpMove = Math.abs(rowDifference) === 2 && Math.abs(colDifference) === 2;
 
-            if (target && target.classList.contains('tile') && target.childElementCount === 0 && target.classList.contains('black')) {
-                if (isForwardMove && Math.abs(colDifference) === 1) {
-                    // Regular move
-                    target.appendChild(piece);
-                } else if (isJumpMove) {
-                    // Jump move
-                    const jumpedTile = getJumpedTile(startRow, startCol, targetRow, targetCol);
-                    if (jumpedTile && jumpedTile.childElementCount > 0) {
-                        const jumpedPiece = jumpedTile.querySelector('.piece');
-                        if (jumpedPiece.classList.contains(currentPlayer === 'red' ? 'black' : 'red')) {
-                            jumpedTile.removeChild(jumpedPiece);
-                            scores[currentPlayer] += 1;
-                            updateScore();
-                            target.appendChild(piece);
-                        } else {
-                            return;
-                        }
+            if (isForwardMove && Math.abs(colDifference) === 1) {
+                // Regular move
+                target.appendChild(piece);
+            } else if (isJumpMove) {
+                // Jump move
+                const jumpedTile = getJumpedTile(startRow, startCol, targetRow, targetCol);
+                if (jumpedTile && jumpedTile.childElementCount > 0) {
+                    const jumpedPiece = jumpedTile.querySelector('.piece');
+                    if (jumpedPiece.classList.contains(currentPlayer === 'red' ? 'black' : 'red')) {
+                        jumpedTile.removeChild(jumpedPiece);
+                        scores[currentPlayer] += 1;
+                        updateScore();
+                        target.appendChild(piece);
                     } else {
+                        resetPiecePosition(piece);
                         return;
                     }
                 } else {
+                    resetPiecePosition(piece);
                     return;
                 }
-
-                currentPlayer = currentPlayer === 'red' ? 'black' : 'red';
-                currentTurnDisplay.textContent = `Current Turn: ${currentPlayer === 'red' ? 'Player 1 (Red)' : 'Player 2 (Black)'}`;
-                piece.style.transform = 'translate(0, 0)';
-                piece.style.position = 'relative';
-                piece.style.left = '0';
-                piece.style.top = '0';
             } else {
-                piece.style.transform = 'translate(0, 0)';
-                piece.style.position = 'relative';
-                piece.style.left = '0';
-                piece.style.top = '0';
+                resetPiecePosition(piece);
+                return;
+            }
+
+            currentPlayer = currentPlayer === 'red' ? 'black' : 'red';
+            currentTurnDisplay.textContent = `Current Turn: ${currentPlayer === 'red' ? 'Player 1 (Red)' : 'Player 2 (Black)'}`;
+            piece.style.transform = 'translate(0, 0)';
+        }
+
+        function resetPiecePosition(piece) {
+            piece.style.position = 'relative';
+            piece.style.left = '0';
+            piece.style.top = '0';
+            if (draggedPieceStartTile) {
+                draggedPieceStartTile.appendChild(piece);
             }
         }
 
