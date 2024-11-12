@@ -117,3 +117,33 @@
     font-weight: bold;
     color: #ffffff;
 }
+.piece {
+    width: 90%;
+    height: 90%;
+    box-sizing: border-box;
+    position: absolute;
+    top: 5%;
+    left: 5%;
+    border-radius: 50%;
+    touch-action: none;
+}
+.board {
+    display: grid;
+    grid-template-columns: repeat(8, 1fr);
+    grid-template-rows: repeat(8, 1fr);
+    width: 400px;
+    height: 400px;
+    margin: 20px auto;
+    border: 2px solid #000;
+}
+.tile {
+    width: 100%;
+    height: 100%;
+    position: relative;
+}
+.tile.black {
+    background-color: #444;
+}
+.tile.white {
+    background-color: #eee;
+}
