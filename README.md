@@ -1,6 +1,6 @@
 # Dustin's Checkers
 
-**CURRENTLY WORKING ON MOBILE/TOUCH BASED MOVEMENTS FOR THE PIECES.**
+**<span style="color: red;">CURRENTLY WORKING ON MOBILE/TOUCH BASED MOVEMENTS FOR THE PIECES.</span>**
 
 Welcome to **Dustin's Checkers**! This is a web-based implementation of the classic checkers board game. Play as Player 1 (Red) or Player 2 (Black) and enjoy the simple yet strategic fun of checkers, all in your browser.
 
@@ -52,4 +52,3 @@ This project is open source and available under the [MIT License](LICENSE).
 
 ---
 Feel free to contribute or provide feedback to help improve the game!
-
