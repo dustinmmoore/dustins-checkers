@@ -152,6 +152,7 @@
             draggedPieceOffsetY = e.touches[0].clientY - draggedPiece.getBoundingClientRect().top;
             draggedPiece.style.position = 'absolute';
             draggedPiece.style.zIndex = 1000;
+            document.body.appendChild(draggedPiece);
         }
 
         function touchMove(e) {
@@ -177,12 +178,13 @@
             draggedPiece.style.position = 'relative';
             draggedPiece.style.left = '0';
             draggedPiece.style.top = '0';
+            draggedPieceStartTile.appendChild(draggedPiece);
             draggedPiece = null;
             draggedPieceStartTile = null;
         }
 
         function movePieceToTarget(piece, target) {
-            const [startRow, startCol] = [piece.parentElement.dataset.row, piece.parentElement.dataset.col].map(Number);
+            const [startRow, startCol] = [piece.dataset.row, piece.dataset.col].map(Number);
             const [targetRow, targetCol] = [target.dataset.row, target.dataset.col].map(Number);
 
             const rowDifference = targetRow - startRow;
