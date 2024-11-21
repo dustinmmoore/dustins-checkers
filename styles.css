@@ -1,4 +1,4 @@
- body {
+body {
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -146,4 +146,19 @@
 }
 .tile.white {
     background-color: #eee;
+}
+
+@media (max-width: 600px) {
+    .board {
+        width: 90vw;
+        height: 90vw;
+        max-width: none;
+        max-height: none;
+    }
+    .score-table {
+        width: 90%;
+    }
+    .contact-info {
+        width: 90%;
+    }
 }
