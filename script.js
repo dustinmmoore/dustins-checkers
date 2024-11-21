@@ -1,3 +1,11 @@
+/**
+ * Author: Dustin Moore
+ * Website: https://www.dustinmoore.dev
+ * Email: dustinmmoore@icloud.com
+ * LinkedIn: https://www.linkedin.com/in/dustinmmoore
+ * GitHub: https://github.com/dustinmmoore
+ */
+
 document.addEventListener('DOMContentLoaded', () => {
     const board = document.getElementById('board');
     const scoreRed = document.getElementById('score-red');
@@ -71,6 +79,7 @@ document.addEventListener('DOMContentLoaded', () => {
         draggedPieceOffsetY = e.touches[0].clientY - draggedPiece.getBoundingClientRect().top;
         draggedPiece.style.position = 'absolute';
         draggedPiece.style.zIndex = 1000;
+        draggedPiece.classList.add('dragging');
     }
 
     function touchMove(e) {
@@ -96,6 +105,7 @@ document.addEventListener('DOMContentLoaded', () => {
         draggedPiece.style.position = 'relative';
         draggedPiece.style.left = '0';
         draggedPiece.style.top = '0';
+        draggedPiece.classList.remove('dragging');
         draggedPiece = null;
         draggedPieceStartTile = null;
     }

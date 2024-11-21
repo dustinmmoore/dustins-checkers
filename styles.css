@@ -53,6 +53,9 @@ body {
 .piece.black {
     background: linear-gradient(145deg, #6272a4, #3b4872);
 }
+.piece.dragging {
+    opacity: 0.5;
+}
 .score-table {
     border-collapse: collapse;
     margin-bottom: 20px;

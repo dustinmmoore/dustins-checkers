@@ -43,7 +43,6 @@ Welcome to **Dustin's Checkers**! This is a web-based implementation of the clas
 - **GitHub**: [github.com/dustinmmoore](https://github.com/dustinmmoore)
 
 ## Future Enhancements
-- **Add King Pieces**: Implement rules for king pieces that can move backward.
 - **Multiplayer Support**: Allow online play against friends.
 - **AI Opponent**: Add a computer player to play against.
 
