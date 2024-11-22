@@ -1,0 +1,17 @@
+
+{
+  "name": "dustins-checkers",
+  "version": "1.0.0",
+  "description": "Interactive Checkers game by Dustin Moore - Web Developer",
+  "scripts": {
+    "build": "npm run minify-js && npm run minify-css",
+    "minify-js": "terser script.js -o script.min.js",
+    "minify-css": "cleancss -o styles.min.css styles.css"
+  },
+  "devDependencies": {
+    "clean-css-cli": "^5.6.3",
+    "terser": "^5.19.2"
+  },
+  "author": "Dustin Moore",
+  "license": "MIT"
+}

@@ -1,3 +1,6 @@
+/* Critical rendering styles first */
+body,html{margin:0;padding:0;height:100%}
+
 body {
     display: flex;
     flex-direction: column;
@@ -163,5 +166,20 @@ body {
     }
     .contact-info {
         width: 90%;
+    }
+}
+
+/* Add print media query for better print layout */
+@media print {
+    .contact-info, .board { break-inside: avoid; }
+    body { background: none; }
+    * { color: black !important; }
+}
+
+/* Add reduced motion preference */
+@media (prefers-reduced-motion: reduce) {
+    * {
+        animation: none !important;
+        transition: none !important;
     }
 }

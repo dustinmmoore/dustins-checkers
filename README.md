@@ -1,21 +1,38 @@
-# Dustin's Checkers
+# Dustin's Checkers Game
 
-**<span style="color: red;">CURRENTLY WORKING ON MOBILE/TOUCH BASED MOVEMENTS FOR THE PIECES.</span>**
+A modern implementation of the classic checkers game built with vanilla JavaScript, featuring drag-and-drop functionality and touch support for mobile devices.
 
-Welcome to **Dustin's Checkers**! This is a web-based implementation of the classic checkers board game. Play as Player 1 (Red) or Player 2 (Black) and enjoy the simple yet strategic fun of checkers, all in your browser.
+## Live Demo
+[Play Dustin's Checkers](https://www.dustinmoore.dev/checkers)
 
 ## Features
-- **Classic Checkers Gameplay**: Drag and drop pieces to make moves, jump opponents, and try to win the game.
-- **Score Tracking**: Keep track of each player's score in real-time.
-- **User-Friendly UI**: Easy-to-use interface with a visually appealing medieval theme.
 
-## Technologies Used
-- **HTML/CSS**: For structuring and styling the webpage.
-- **JavaScript**: Provides interactivity and game logic.
-- **Google Fonts**: MedievalSharp for a unique aesthetic.
-- **Font Awesome**: Icons for contact information.
+- 🎮 Classic checkers gameplay mechanics
+- 👑 King piece promotion
+- 📱 Mobile-friendly with touch support
+- 🎯 Drag and drop functionality
+- 💯 Real-time score tracking
+- 🎨 Medieval-themed UI design
+- 📏 Responsive layout for all devices
 
-## Installation
+## Game Rules
+
+1. Red pieces move first
+2. Pieces can only move diagonally forward
+3. Kings can move diagonally both forward and backward
+4. Captures are mandatory when available
+5. Multiple jumps are required when possible
+6. Pieces become kings when reaching the opposite end
+7. Game ends when one player captures all opponent pieces
+
+## Technical Implementation
+
+### Prerequisites
+- Modern web browser with JavaScript enabled
+- Local development server (optional)
+
+### Installation
+
 1. Clone the repository:
    ```bash
    git clone https://github.com/dustinmmoore/dustins-checkers.git

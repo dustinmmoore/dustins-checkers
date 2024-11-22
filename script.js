@@ -1,11 +1,5 @@
-/**
- * Author: Dustin Moore
- * Website: https://www.dustinmoore.dev
- * Email: dustinmmoore@icloud.com
- * LinkedIn: https://www.linkedin.com/in/dustinmmoore
- * GitHub: https://github.com/dustinmmoore
- */
-
+/*! Checkers Game by Dustin Moore - See https://www.dustinmoore.dev */
+'use strict';
 document.addEventListener('DOMContentLoaded', () => {
     const board = document.getElementById('board');
     const scoreRed = document.getElementById('score-red');
