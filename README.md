@@ -3,7 +3,7 @@
 A modern implementation of the classic checkers game built with vanilla JavaScript, featuring drag-and-drop functionality and touch support for mobile devices.
 
 ## Live Demo
-[Play Dustin's Checkers](https://www.dustinmoore.dev/checkers)
+[Play Dustin's Checkers](https://dustins-checkers.vercel.app/)
 
 ## Features
 
