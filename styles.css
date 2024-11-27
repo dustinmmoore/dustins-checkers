@@ -169,6 +169,21 @@ body {
     }
 }
 
+@media (max-width: 800px) {
+    .board {
+        width: 80vw;
+        height: 80vw;
+        max-width: none;
+        max-height: none;
+    }
+    .score-table {
+        width: 80%;
+    }
+    .contact-info {
+        width: 80%;
+    }
+}
+
 /* Add print media query for better print layout */
 @media print {
     .contact-info, .board { break-inside: avoid; }
