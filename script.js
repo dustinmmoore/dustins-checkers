@@ -1,4 +1,12 @@
-/*! Checkers Game by Dustin Moore - See https://www.dustinmoore.dev */
+/*!
+ * Author: Dustin Moore
+ * Website: https://www.dustinmoore.dev
+ * Email: dustinmmoore@icloud.com
+ * LinkedIn: https://www.linkedin.com/in/dustinmmoore
+ * GitHub: https://github.com/dustinmmoore
+ * Project: Dustin's Checkers Game
+ */
+
 'use strict';
 document.addEventListener('DOMContentLoaded', () => {
     const board = document.getElementById('board');
@@ -54,12 +62,20 @@ document.addEventListener('DOMContentLoaded', () => {
             e.preventDefault();
             return;
         }
-        e.dataTransfer.setData('text/plain', `${e.target.parentElement.dataset.row},${e.target.parentElement.dataset.col}`);
-        setTimeout(() => e.target.style.display = 'none', 0);
+        draggedPiece = e.target;
+        draggedPieceStartTile = e.target.parentElement;
+        e.dataTransfer.setData('text/plain', `${draggedPieceStartTile.dataset.row},${draggedPieceStartTile.dataset.col}`);
+        setTimeout(() => e.target.classList.add('dragging'), 0);
+        highlightValidMoves(draggedPieceStartTile);
     }
 
     function dragEnd(e) {
-        e.target.style.display = 'block';
+        if (draggedPiece) {
+            draggedPiece.classList.remove('dragging');
+            draggedPiece = null;
+            draggedPieceStartTile = null;
+        }
+        clearHighlights();
     }
 
     function touchStart(e) {
@@ -90,44 +106,90 @@ document.addEventListener('DOMContentLoaded', () => {
         const isKing = piece.dataset.king === 'true';
         
         // Clear previous highlights
-        document.querySelectorAll('.valid-move').forEach(tile => {
-            tile.classList.remove('valid-move');
+        clearHighlights();
+        
+        // Show both regular moves and jumps
+        highlightRegularMoves(row, col, piece);
+        highlightJumps(row, col, piece);
+    }
+
+    function highlightJumps(row, col, piece) {
+        const isKing = piece.dataset.king === 'true';
+        const directions = getValidDirections(isKing);
+        
+        directions.forEach(([rowDiff, colDiff]) => {
+            const jumpRow = row + (rowDiff * 2);
+            const jumpCol = col + (colDiff * 2);
+            
+            if (isValidPosition(jumpRow, jumpCol)) {
+                const middleRow = row + rowDiff;
+                const middleCol = col + colDiff;
+                const jumpTile = document.querySelector(`[data-row='${jumpRow}'][data-col='${jumpCol}']`);
+                const middleTile = document.querySelector(`[data-row='${middleRow}'][data-col='${middleCol}']`);
+                
+                if (isValidJumpTarget(jumpTile, middleTile)) {
+                    jumpTile.classList.add('valid-move');
+                }
+            }
         });
+    }
+
+    function highlightRegularMoves(row, col, piece) {
+        const isKing = piece.dataset.king === 'true';
+        const directions = getValidDirections(isKing);
         
-        // Calculate valid moves
-        const directions = [];
-        if (currentPlayer === 'red' || isKing) {
-            directions.push([-1, -1], [-1, 1]); // Forward for red
-        }
-        if (currentPlayer === 'black' || isKing) {
-            directions.push([1, -1], [1, 1]); // Forward for black
-        }
-        
-        // Check for regular moves and jumps
-        if (!mandatoryJumpExists()) {
-            directions.forEach(([rowDiff, colDiff]) => {
-                const targetRow = row + rowDiff;
-                const targetCol = col + colDiff;
+        directions.forEach(([rowDiff, colDiff]) => {
+            const targetRow = row + rowDiff;
+            const targetCol = col + colDiff;
+            
+            if (isValidPosition(targetRow, targetCol)) {
                 const targetTile = document.querySelector(`[data-row='${targetRow}'][data-col='${targetCol}']`);
                 if (targetTile && targetTile.childElementCount === 0) {
                     targetTile.classList.add('valid-move');
                 }
-            });
-        }
-        
-        // Check for jumps
-        directions.forEach(([rowDiff, colDiff]) => {
-            const jumpRow = row + rowDiff * 2;
-            const jumpCol = colDiff * 2;
-            const jumpTile = document.querySelector(`[data-row='${jumpRow}'][data-col='${jumpCol}']`);
-            const middleTile = document.querySelector(`[data-row='${row + rowDiff}'][data-col='${col + colDiff}']`);
-            
-            if (jumpTile && middleTile && 
-                middleTile.childElementCount > 0 && 
-                jumpTile.childElementCount === 0 &&
-                middleTile.querySelector('.piece').classList.contains(currentPlayer === 'red' ? 'black' : 'red')) {
-                jumpTile.classList.add('valid-move');
             }
+        });
+    }
+
+    function getValidDirections(isKing) {
+        const directions = [];
+        if (currentPlayer === 'red' || isKing) {
+            directions.push([-1, -1], [-1, 1]); // Upward diagonals
+        }
+        if (currentPlayer === 'black' || isKing) {
+            directions.push([1, -1], [1, 1]); // Downward diagonals
+        }
+        return directions;
+    }
+
+    function isValidPosition(row, col) {
+        return row >= 0 && row < 8 && col >= 0 && col < 8;
+    }
+
+    function isValidJumpTarget(jumpTile, middleTile) {
+        return jumpTile && 
+               middleTile && 
+               jumpTile.childElementCount === 0 && 
+               middleTile.childElementCount > 0 && 
+               middleTile.querySelector('.piece').classList.contains(currentPlayer === 'red' ? 'black' : 'red');
+    }
+
+    function hasValidJumps(row, col, piece) {
+        const isKing = piece.dataset.king === 'true';
+        const directions = getValidDirections(isKing);
+        
+        return directions.some(([rowDiff, colDiff]) => {
+            const jumpRow = row + (rowDiff * 2);
+            const jumpCol = col + (colDiff * 2);
+            
+            if (!isValidPosition(jumpRow, jumpCol)) return false;
+            
+            const middleRow = row + rowDiff;
+            const middleCol = col + colDiff;
+            const jumpTile = document.querySelector(`[data-row='${jumpRow}'][data-col='${jumpCol}']`);
+            const middleTile = document.querySelector(`[data-row='${middleRow}'][data-col='${middleCol}']`);
+            
+            return isValidJumpTarget(jumpTile, middleTile);
         });
     }
 
@@ -174,78 +236,90 @@ document.addEventListener('DOMContentLoaded', () => {
     function movePieceToTarget(piece, target) {
         if (!piece || !target || !target.classList.contains('tile')) return;
 
-        const [startRow, startCol] = [piece.parentElement.dataset.row, piece.parentElement.dataset.col].map(Number);
-        const [targetRow, targetCol] = [target.dataset.row, target.dataset.col].map(Number);
+        const startTile = piece.parentElement;
+        const [startRow, startCol] = [parseInt(startTile.dataset.row), parseInt(startTile.dataset.col)];
+        const [targetRow, targetCol] = [parseInt(target.dataset.row), parseInt(target.dataset.col)];
 
-        // Validate target is empty
-        if (target.childElementCount > 0) {
+        if (!isValidMove(piece, startRow, startCol, targetRow, targetCol)) {
             resetPiecePosition(piece);
             return;
         }
 
-        const rowDifference = targetRow - startRow;
-        const colDifference = targetCol - startCol;
+        const isJumpMove = Math.abs(targetRow - startRow) === 2;
+        
+        if (isJumpMove) {
+            handleJumpMove(piece, startRow, startCol, targetRow, targetCol, target);
+        } else {
+            target.appendChild(piece);
+        }
+
+        checkKingPromotion(piece, targetRow);
+        switchTurns();
+    }
+
+    function isValidMove(piece, startRow, startCol, targetRow, targetCol) {
+        const rowDiff = targetRow - startRow;
+        const colDiff = targetCol - startCol;
         const isKing = piece.dataset.king === 'true';
 
-        // Validate move direction
+        // Basic validations
+        if (!isValidPosition(targetRow, targetCol)) return false;
+        if (Math.abs(colDiff) !== Math.abs(rowDiff)) return false;
+
+        // Direction validation
         const isValidDirection = isKing || 
-            (currentPlayer === 'red' && rowDifference < 0) ||
-            (currentPlayer === 'black' && rowDifference > 0);
+            (currentPlayer === 'red' && rowDiff < 0) || 
+            (currentPlayer === 'black' && rowDiff > 0);
 
-        if (!isValidDirection) {
-            resetPiecePosition(piece);
-            return;
-        }
+        if (!isValidDirection) return false;
 
-        const isJumpMove = Math.abs(rowDifference) === 2 && Math.abs(colDifference) === 2;
-        const isRegularMove = Math.abs(rowDifference) === 1 && Math.abs(colDifference) === 1;
+        // Validate move distance (1 for regular move, 2 for jump)
+        const moveDistance = Math.abs(rowDiff);
+        if (moveDistance !== 1 && moveDistance !== 2) return false;
 
-        if (mandatoryJumpExists() && !isJumpMove) {
-            resetPiecePosition(piece);
-            return;
-        }
-
-        if (isJumpMove) {
-            const jumpedTile = getJumpedTile(startRow, startCol, targetRow, targetCol);
+        // For jump moves, verify there's an opponent's piece to jump over
+        if (moveDistance === 2) {
+            const jumpedRow = startRow + rowDiff/2;
+            const jumpedCol = startCol + colDiff/2;
+            const jumpedTile = document.querySelector(`[data-row='${jumpedRow}'][data-col='${jumpedCol}']`);
             const jumpedPiece = jumpedTile?.querySelector('.piece');
             
-            if (!jumpedPiece || jumpedPiece.classList.contains(currentPlayer)) {
-                resetPiecePosition(piece);
-                return;
-            }
+            return jumpedPiece && 
+                   jumpedPiece.classList.contains(currentPlayer === 'red' ? 'black' : 'red');
+        }
 
-            jumpedTile.removeChild(jumpedPiece);
-            scores[currentPlayer]++;
-            updateScore();
-            target.appendChild(piece);
+        return true;
+    }
 
-            if (canJumpAgain(targetRow, targetCol, piece)) {
-                // Don't switch turns if another jump is available
-                highlightValidMoves(target);
-                return;
-            }
-        } else if (isRegularMove && !mandatoryJumpExists()) {
-            target.appendChild(piece);
-        } else {
+    function handleJumpMove(piece, startRow, startCol, targetRow, targetCol, target) {
+        const jumpedRow = startRow + (targetRow - startRow)/2;
+        const jumpedCol = startCol + (targetCol - startCol)/2;
+        const jumpedTile = document.querySelector(`[data-row='${jumpedRow}'][data-col='${jumpedCol}']`);
+        const jumpedPiece = jumpedTile?.querySelector('.piece');
+
+        if (!jumpedPiece || jumpedPiece.classList.contains(currentPlayer)) {
             resetPiecePosition(piece);
             return;
         }
 
-        // Check for king promotion
+        jumpedTile.removeChild(jumpedPiece);
+        scores[currentPlayer]++;
+        updateScore();
+        target.appendChild(piece);
+    }
+
+    function checkKingPromotion(piece, targetRow) {
         if ((currentPlayer === 'red' && targetRow === 0) || 
             (currentPlayer === 'black' && targetRow === 7)) {
             piece.dataset.king = 'true';
             piece.classList.add('king');
         }
+    }
 
-        // Switch turns
+    function switchTurns() {
         currentPlayer = currentPlayer === 'red' ? 'black' : 'red';
         currentTurnDisplay.textContent = `Current Turn: ${currentPlayer === 'red' ? 'Player 1 (Red)' : 'Player 2 (Black)'}`;
-        
-        // Clear any remaining highlights
-        document.querySelectorAll('.valid-move').forEach(tile => {
-            tile.classList.remove('valid-move');
-        });
+        document.querySelectorAll('.valid-move').forEach(tile => tile.classList.remove('valid-move'));
     }
 
     function movePieceToPosition(x, y) {
@@ -283,45 +357,73 @@ document.addEventListener('DOMContentLoaded', () => {
         scoreBlack.textContent = scores.black;
     }
 
-    function mandatoryJumpExists() {
-        const pieces = document.querySelectorAll(`.piece.${currentPlayer}`);
-        for (const piece of pieces) {
-            const [row, col] = [piece.parentElement.dataset.row, piece.parentElement.dataset.col].map(Number);
-            if (canJumpAgain(row, col, piece)) {
-                return true;
-            }
-        }
-        return false;
-    }
-
     function canJumpAgain(row, col, piece) {
-        const directions = (currentPlayer === 'red' || piece.dataset.king === 'true') ? [[-2, -2], [-2, 2]] : [];
-        directions.push(...((currentPlayer === 'black' || piece.dataset.king === 'true') ? [[2, -2], [2, 2]] : []));
+        const isKing = piece.dataset.king === 'true';
+        const directions = [];
+        
+        // Calculate possible jump directions
+        if (currentPlayer === 'red' || isKing) {
+            directions.push([-2, -2], [-2, 2]);  // Upward jumps
+        }
+        if (currentPlayer === 'black' || isKing) {
+            directions.push([2, -2], [2, 2]);    // Downward jumps
+        }
+
         for (const [rowDiff, colDiff] of directions) {
             const targetRow = row + rowDiff;
             const targetCol = col + colDiff;
-            const jumpedTile = getJumpedTile(row, col, targetRow, targetCol);
-            if (jumpedTile && jumpedTile.childElementCount > 0) {
+            
+            // Validate board boundaries
+            if (targetRow < 0 || targetRow > 7 || targetCol < 0 || targetCol > 7) continue;
+            
+            const jumpedRow = row + rowDiff/2;
+            const jumpedCol = col + colDiff/2;
+            const jumpedTile = document.querySelector(`[data-row='${jumpedRow}'][data-col='${jumpedCol}']`);
+            const targetTile = document.querySelector(`[data-row='${targetRow}'][data-col='${targetCol}']`);
+            
+            if (jumpedTile && targetTile && 
+                jumpedTile.childElementCount > 0 && 
+                targetTile.childElementCount === 0) {
                 const jumpedPiece = jumpedTile.querySelector('.piece');
                 if (jumpedPiece.classList.contains(currentPlayer === 'red' ? 'black' : 'red')) {
-                    const targetTile = document.querySelector(`[data-row='${targetRow}'][data-col='${targetCol}']`);
-                    if (targetTile && targetTile.childElementCount === 0) {
-                        return true;
-                    }
+                    return true;
                 }
             }
         }
         return false;
     }
 
-    board.addEventListener('dragover', (e) => e.preventDefault());
+    function handleDragOver(e) {
+        e.preventDefault();
+        const tile = e.target.closest('.tile');
+        if (tile && tile.classList.contains('valid-move')) {
+            e.dataTransfer.dropEffect = 'move';
+        } else {
+            e.dataTransfer.dropEffect = 'none';
+        }
+    }
 
-    board.addEventListener('drop', (e) => {
-        const target = e.target;
-        const [startRow, startCol] = e.dataTransfer.getData('text').split(',').map(Number);
-        const piece = document.querySelector(`[data-row='${startRow}'][data-col='${startCol}'] .piece`);
-        movePieceToTarget(piece, target);
-    });
+    function handleDrop(e) {
+        e.preventDefault();
+        const target = e.target.closest('.tile');
+        if (!target || !draggedPiece) return;
+
+        if (target.classList.contains('valid-move')) {
+            movePieceToTarget(draggedPiece, target);
+        } else {
+            resetPiecePosition(draggedPiece);
+        }
+        clearHighlights();
+    }
+
+    function clearHighlights() {
+        document.querySelectorAll('.valid-move').forEach(tile => {
+            tile.classList.remove('valid-move');
+        });
+    }
+
+    board.addEventListener('dragover', handleDragOver);
+    board.addEventListener('drop', handleDrop);
 
     initializeBoard();
 });

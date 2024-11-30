@@ -1,3 +1,12 @@
+/*!
+ * Author: Dustin Moore
+ * Website: https://www.dustinmoore.dev
+ * Email: dustinmmoore@icloud.com
+ * LinkedIn: https://www.linkedin.com/in/dustinmmoore
+ * GitHub: https://github.com/dustinmmoore
+ * Project: Dustin's Checkers Game
+ */
+
 /* Critical rendering styles first */
 body,html{margin:0;padding:0;height:100%}
 
@@ -11,29 +20,37 @@ body {
     background: linear-gradient(135deg, #1e1e2f, #3b3b58);
     color: #e0e0e0;
     font-family: 'MedievalSharp', cursive;
+    overflow-x: hidden;
 }
+
 .container {
     display: flex;
     flex-direction: column;
     align-items: center;
-    text-align: center;
+    width: 100%;
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 0 20px;
+    box-sizing: border-box;
 }
+
 .title {
     font-size: 2em;
     margin-bottom: 20px;
 }
+
+/* Update board sizing for better mobile display */
 .board {
     display: grid;
     grid-template-columns: repeat(8, 1fr);
     grid-template-rows: repeat(8, 1fr);
-    width: 90vw;
-    max-width: 480px;
-    height: 90vw;
-    max-height: 480px;
+    width: min(90vw, 480px); /* Use min() for responsive sizing */
+    height: min(90vw, 480px);
     border: 5px solid #2e2e3e;
-    margin-bottom: 20px;
+    margin: 20px auto;
     box-shadow: 0 0 20px #000;
 }
+
 .tile {
     width: 100%;
     height: 100%;
@@ -47,8 +64,16 @@ body {
 .piece {
     width: 80%;
     height: 80%;
+    position: absolute;
+    top: 10%;
+    left: 10%;
     border-radius: 50%;
     box-shadow: 0 0 15px #000;
+    touch-action: none;
+    cursor: grab;
+    user-select: none;
+    -webkit-user-select: none;
+    transition: transform 0.1s ease;
 }
 .piece.red {
     background: linear-gradient(145deg, #ff5555, #a82424);
@@ -57,7 +82,10 @@ body {
     background: linear-gradient(145deg, #6272a4, #3b4872);
 }
 .piece.dragging {
-    opacity: 0.5;
+    cursor: grabbing;
+    opacity: 0.8;
+    z-index: 1000;
+    pointer-events: none;
 }
 .score-table {
     border-collapse: collapse;
@@ -84,24 +112,6 @@ body {
     font-weight: bold;
     color: #ffffff;
 }
-.piece {
-    width: 90%;
-    height: 90%;
-    box-sizing: border-box;
-    position: absolute;
-    top: 5%;
-    left: 5%;
-    border-radius: 50%;
-    touch-action: none;
-    cursor: grab;
-    user-select: none;
-    -webkit-user-select: none;
-    transition: transform 0.1s ease;
-}
-.piece.dragging {
-    cursor: grabbing;
-    opacity: 0.8;
-}
 .piece.king::before {
     content: '👑';
     position: absolute;
@@ -111,28 +121,20 @@ body {
     font-size: 1.2em;
     pointer-events: none;
 }
-.board {
-    display: grid;
-    grid-template-columns: repeat(8, 1fr);
-    grid-template-rows: repeat(8, 1fr);
-    width: 400px;
-    height: 400px;
-    margin: 20px auto;
-    border: 2px solid #000;
-}
 .tile {
     width: 100%;
     height: 100%;
     position: relative;
 }
 .tile.black {
-    background-color: #444;
+    background: linear-gradient(145deg, #2d2d3b, #1b1b26);
 }
 .tile.white {
-    background-color: #eee;
+    background: linear-gradient(145deg, #44475a, #2c2c3e);
 }
 .valid-move {
     position: relative;
+    cursor: pointer;
 }
 .valid-move::after {
     content: '';
@@ -143,38 +145,54 @@ body {
     width: 30%;
     height: 30%;
     border-radius: 50%;
-    background-color: rgba(80, 250, 123, 0.3);
+    background-color: rgba(80, 250, 123, 0.5);
     pointer-events: none;
+    animation: pulse 1s infinite;
+}
+
+@keyframes pulse {
+    0% { transform: translate(-50%, -50%) scale(0.8); opacity: 0.8; }
+    50% { transform: translate(-50%, -50%) scale(1.2); opacity: 0.4; }
+    100% { transform: translate(-50%, -50%) scale(0.8); opacity: 0.8; }
 }
 
 @media (max-width: 600px) {
+    body {
+        padding: 10px;
+    }
+    
+    .container {
+        padding: 0 10px;
+    }
+
+    .title {
+        font-size: 1.5em;
+    }
+
+    .score-table {
+        font-size: 0.9em;
+        width: 100%;
+    }
+
+    .current-turn {
+        font-size: 1em;
+    }
+
+    .piece.king::before {
+        font-size: 1em;
+    }
+
     .board {
         width: 90vw;
         height: 90vw;
-        max-width: 400px;
-        max-height: 400px;
     }
     .score-table {
         width: 90%;
+        margin: 10px auto;
     }
-    .piece {
-        width: 85%;
-        height: 85%;
-    }
-}
-
-@media (max-width: 800px) {
-    .board {
-        width: 80vw;
-        height: 80vw;
-        max-width: none;
-        max-height: none;
-    }
-    .score-table {
-        width: 80%;
-    }
-    .contact-info {
-        width: 80%;
+    .title {
+        font-size: 1.5em;
+        margin: 10px 0;
     }
 }
 
@@ -192,3 +210,31 @@ body {
         transition: none !important;
     }
 }
+@media (max-width: 800px) {
+    .board {
+        width: 80vw;
+        height: 80vw;
+        max-width: none;
+        max-height: none;
+    }
+    .score-table {
+        width: 80%;
+    }
+    .contact-info {
+        width: 80%;
+    }
+}
+
+/* Add better touch handling for mobile */
+@media (hover: none) {
+    .piece {
+        touch-action: none;
+        -webkit-tap-highlight-color: transparent;
+    }
+
+    .valid-move::after {
+        width: 40%;
+        height: 40%;
+    }
+}
+
