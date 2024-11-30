@@ -63,92 +63,195 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function touchStart(e) {
-        if (!e.target.classList.contains(currentPlayer)) {
-            e.preventDefault();
+        if (!e.target.classList.contains('piece') || !e.target.classList.contains(currentPlayer)) {
             return;
         }
+        e.preventDefault();
+        
         draggedPiece = e.target;
         draggedPieceStartTile = e.target.parentElement;
-        draggedPieceOffsetX = e.touches[0].clientX - draggedPiece.getBoundingClientRect().left;
-        draggedPieceOffsetY = e.touches[0].clientY - draggedPiece.getBoundingClientRect().top;
-        draggedPiece.style.position = 'absolute';
-        draggedPiece.style.zIndex = 1000;
+        const touch = e.touches[0];
+        const rect = draggedPiece.getBoundingClientRect();
+        
+        draggedPieceOffsetX = touch.clientX - rect.left;
+        draggedPieceOffsetY = touch.clientY - rect.top;
+        
+        draggedPiece.style.position = 'fixed';
+        draggedPiece.style.zIndex = '1000';
         draggedPiece.classList.add('dragging');
+        
+        highlightValidMoves(draggedPieceStartTile);
+        movePieceToPosition(touch.clientX, touch.clientY);
+    }
+
+    function highlightValidMoves(startTile) {
+        const [row, col] = [parseInt(startTile.dataset.row), parseInt(startTile.dataset.col)];
+        const piece = startTile.querySelector('.piece');
+        const isKing = piece.dataset.king === 'true';
+        
+        // Clear previous highlights
+        document.querySelectorAll('.valid-move').forEach(tile => {
+            tile.classList.remove('valid-move');
+        });
+        
+        // Calculate valid moves
+        const directions = [];
+        if (currentPlayer === 'red' || isKing) {
+            directions.push([-1, -1], [-1, 1]); // Forward for red
+        }
+        if (currentPlayer === 'black' || isKing) {
+            directions.push([1, -1], [1, 1]); // Forward for black
+        }
+        
+        // Check for regular moves and jumps
+        if (!mandatoryJumpExists()) {
+            directions.forEach(([rowDiff, colDiff]) => {
+                const targetRow = row + rowDiff;
+                const targetCol = col + colDiff;
+                const targetTile = document.querySelector(`[data-row='${targetRow}'][data-col='${targetCol}']`);
+                if (targetTile && targetTile.childElementCount === 0) {
+                    targetTile.classList.add('valid-move');
+                }
+            });
+        }
+        
+        // Check for jumps
+        directions.forEach(([rowDiff, colDiff]) => {
+            const jumpRow = row + rowDiff * 2;
+            const jumpCol = colDiff * 2;
+            const jumpTile = document.querySelector(`[data-row='${jumpRow}'][data-col='${jumpCol}']`);
+            const middleTile = document.querySelector(`[data-row='${row + rowDiff}'][data-col='${col + colDiff}']`);
+            
+            if (jumpTile && middleTile && 
+                middleTile.childElementCount > 0 && 
+                jumpTile.childElementCount === 0 &&
+                middleTile.querySelector('.piece').classList.contains(currentPlayer === 'red' ? 'black' : 'red')) {
+                jumpTile.classList.add('valid-move');
+            }
+        });
     }
 
     function touchMove(e) {
         if (!draggedPiece) return;
-        const touch = e.touches[0];
-        const newX = touch.clientX - draggedPieceOffsetX;
-        const newY = touch.clientY - draggedPieceOffsetY;
-        draggedPiece.style.left = `${newX}px`;
-        draggedPiece.style.top = `${newY}px`;
         e.preventDefault();
+        const touch = e.touches[0];
+        draggedPiece.style.left = `${touch.clientX - draggedPieceOffsetX}px`;
+        draggedPiece.style.top = `${touch.clientY - draggedPieceOffsetY}px`;
     }
 
     function touchEnd(e) {
         if (!draggedPiece) return;
+        e.preventDefault();
+        
+        // Clear highlights
+        document.querySelectorAll('.valid-move').forEach(tile => {
+            tile.classList.remove('valid-move');
+        });
+        
         const touch = e.changedTouches[0];
         const target = document.elementFromPoint(touch.clientX, touch.clientY);
-        if (target && target.classList.contains('tile') && target.classList.contains('black') && target.childElementCount === 0) {
+        
+        if (target && target.classList.contains('tile') && target.classList.contains('valid-move')) {
             movePieceToTarget(draggedPiece, target);
         } else {
             resetPiecePosition(draggedPiece);
         }
-        draggedPiece.style.zIndex = '';
+        
+        cleanupDraggedPiece();
+    }
+
+    function cleanupDraggedPiece() {
+        if (!draggedPiece) return;
         draggedPiece.style.position = 'relative';
-        draggedPiece.style.left = '0';
-        draggedPiece.style.top = '0';
+        draggedPiece.style.zIndex = '';
+        draggedPiece.style.left = '';
+        draggedPiece.style.top = '';
         draggedPiece.classList.remove('dragging');
         draggedPiece = null;
         draggedPieceStartTile = null;
     }
 
     function movePieceToTarget(piece, target) {
+        if (!piece || !target || !target.classList.contains('tile')) return;
+
         const [startRow, startCol] = [piece.parentElement.dataset.row, piece.parentElement.dataset.col].map(Number);
         const [targetRow, targetCol] = [target.dataset.row, target.dataset.col].map(Number);
 
+        // Validate target is empty
+        if (target.childElementCount > 0) {
+            resetPiecePosition(piece);
+            return;
+        }
+
         const rowDifference = targetRow - startRow;
         const colDifference = targetCol - startCol;
+        const isKing = piece.dataset.king === 'true';
 
-        const isForwardMove = (currentPlayer === 'red' && rowDifference === -1) || (currentPlayer === 'black' && rowDifference === 1);
+        // Validate move direction
+        const isValidDirection = isKing || 
+            (currentPlayer === 'red' && rowDifference < 0) ||
+            (currentPlayer === 'black' && rowDifference > 0);
+
+        if (!isValidDirection) {
+            resetPiecePosition(piece);
+            return;
+        }
+
         const isJumpMove = Math.abs(rowDifference) === 2 && Math.abs(colDifference) === 2;
+        const isRegularMove = Math.abs(rowDifference) === 1 && Math.abs(colDifference) === 1;
 
-        if (isForwardMove && Math.abs(colDifference) === 1 && !mandatoryJumpExists()) {
-            target.appendChild(piece);
-        } else if (isJumpMove) {
+        if (mandatoryJumpExists() && !isJumpMove) {
+            resetPiecePosition(piece);
+            return;
+        }
+
+        if (isJumpMove) {
             const jumpedTile = getJumpedTile(startRow, startCol, targetRow, targetCol);
-            if (jumpedTile && jumpedTile.childElementCount > 0) {
-                const jumpedPiece = jumpedTile.querySelector('.piece');
-                if (jumpedPiece.classList.contains(currentPlayer === 'red' ? 'black' : 'red')) {
-                    jumpedTile.removeChild(jumpedPiece);
-                    scores[currentPlayer] += 1;
-                    updateScore();
-                    target.appendChild(piece);
-                    if (canJumpAgain(targetRow, targetCol, piece)) {
-                        return;
-                    }
-                } else {
-                    resetPiecePosition(piece);
-                    return;
-                }
-            } else {
+            const jumpedPiece = jumpedTile?.querySelector('.piece');
+            
+            if (!jumpedPiece || jumpedPiece.classList.contains(currentPlayer)) {
                 resetPiecePosition(piece);
                 return;
             }
+
+            jumpedTile.removeChild(jumpedPiece);
+            scores[currentPlayer]++;
+            updateScore();
+            target.appendChild(piece);
+
+            if (canJumpAgain(targetRow, targetCol, piece)) {
+                // Don't switch turns if another jump is available
+                highlightValidMoves(target);
+                return;
+            }
+        } else if (isRegularMove && !mandatoryJumpExists()) {
+            target.appendChild(piece);
         } else {
             resetPiecePosition(piece);
             return;
         }
 
-        if ((currentPlayer === 'red' && targetRow === 0) || (currentPlayer === 'black' && targetRow === 7)) {
+        // Check for king promotion
+        if ((currentPlayer === 'red' && targetRow === 0) || 
+            (currentPlayer === 'black' && targetRow === 7)) {
             piece.dataset.king = 'true';
             piece.classList.add('king');
         }
 
+        // Switch turns
         currentPlayer = currentPlayer === 'red' ? 'black' : 'red';
         currentTurnDisplay.textContent = `Current Turn: ${currentPlayer === 'red' ? 'Player 1 (Red)' : 'Player 2 (Black)'}`;
-        piece.style.transform = 'translate(0, 0)';
+        
+        // Clear any remaining highlights
+        document.querySelectorAll('.valid-move').forEach(tile => {
+            tile.classList.remove('valid-move');
+        });
+    }
+
+    function movePieceToPosition(x, y) {
+        if (!draggedPiece) return;
+        draggedPiece.style.left = `${x - draggedPieceOffsetX}px`;
+        draggedPiece.style.top = `${y - draggedPieceOffsetY}px`;
     }
 
     function resetPiecePosition(piece) {

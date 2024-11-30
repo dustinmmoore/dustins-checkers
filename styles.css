@@ -78,45 +78,6 @@ body {
 .score-table td {
     background-color: #2e2e3e;
 }
-.contact-info {
-    margin-top: 20px;
-    padding: 20px;
-    background: #2e2e3e;
-    border-radius: 10px;
-    box-shadow: 0 0 20px #000;
-    text-align: center;
-    width: 100%;
-    max-width: 400px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-}
-.contact-info .contact-item {
-    display: flex;
-    align-items: center;
-    margin: 10px 0;
-    background: linear-gradient(135deg, #3b3b58, #2e2e3e);
-    padding: 10px;
-    border-radius: 5px;
-    width: 90%;
-}
-.contact-info .contact-item i {
-    margin-right: 10px;
-    font-size: 1.5em;
-    color: #50fa7b;
-}
-.contact-info a {
-    color: #50fa7b;
-    text-decoration: none;
-    font-weight: bold;
-}
-.contact-info a:hover {
-    text-decoration: underline;
-}
-.contact-info .author {
-    color: #00FFFF;
-    font-weight: bold;
-}
 .current-turn {
     font-size: 1.2em;
     margin-bottom: 20px;
@@ -132,6 +93,23 @@ body {
     left: 5%;
     border-radius: 50%;
     touch-action: none;
+    cursor: grab;
+    user-select: none;
+    -webkit-user-select: none;
+    transition: transform 0.1s ease;
+}
+.piece.dragging {
+    cursor: grabbing;
+    opacity: 0.8;
+}
+.piece.king::before {
+    content: '👑';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 1.2em;
+    pointer-events: none;
 }
 .board {
     display: grid;
@@ -153,25 +131,41 @@ body {
 .tile.white {
     background-color: #eee;
 }
+.valid-move {
+    position: relative;
+}
+.valid-move::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 30%;
+    height: 30%;
+    border-radius: 50%;
+    background-color: rgba(80, 250, 123, 0.3);
+    pointer-events: none;
+}
 
 @media (max-width: 600px) {
     .board {
         width: 90vw;
         height: 90vw;
-        max-width: none;
-        max-height: none;
+        max-width: 400px;
+        max-height: 400px;
     }
     .score-table {
         width: 90%;
     }
-    .contact-info {
-        width: 90%;
+    .piece {
+        width: 85%;
+        height: 85%;
     }
 }
 
 /* Add print media query for better print layout */
 @media print {
-    .contact-info, .board { break-inside: avoid; }
+    .board { break-inside: avoid; }
     body { background: none; }
     * { color: black !important; }
 }
